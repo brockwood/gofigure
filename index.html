@@ -1,0 +1,508 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Gofigure by Pollenware</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/Pollenware/gofigure">Fork On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/Pollenware/gofigure/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/Pollenware/gofigure/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
+    <div class="wrapper">
+
+      <section>
+        <div id="title">
+          <h1>Gofigure</h1>
+          <p>Configuration library for node.js</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/Pollenware">Pollenware</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></span>
+        </div>
+
+        <h1>gofigure</h1>
+
+<p>Gofigure is a configuration tool for node to help in the gathering and monitoring of configuration files in node. </p>
+
+<h1>Installation</h1>
+
+<pre><code>npm install gofigure
+</code></pre>
+
+<h1>Usage</h1>
+
+<ul>
+<li>
+<a href="#load">Loading A Configuration</a><br><ul>
+<li>
+<a href="#loadDir">Directories</a><br>
+</li>
+<li><a href="#loadFiles">Files</a></li>
+</ul>
+</li>
+<li>
+<a href="#monitoring">Monitoring Property Changes</a>
+
+<ul>
+<li>
+<a href="#monitoringAll">Monitoring All Files</a><br>
+</li>
+<li>
+<a href="#monitoringSome">Monitoring Certain Files</a><br>
+</li>
+<li><a href="#monitoringSyntax">Property Topic Syntax</a></li>
+<li><a href="#monitoringCB">Property Change Callback</a></li>
+</ul>
+</li>
+<li><a href="#environments">Environments</a></li>
+</ul><p><a name="load"></a></p>
+
+<h2>Loading configurations</h2>
+
+<p>Gofigure currently handles the loading of JSON files for configurations. </p>
+
+<p>To Get an instance of a configuration object use the <code>gofigure</code> method. The <code>gofigure</code> method takes an object that accepts the following options</p>
+
+<ul>
+<li>
+<a href="#loadDir">locations</a>  : an array of directories that contain your configurations.</li>
+<li>
+<a href="#loadFiles">files</a>  : an array of files that contain your configurations.<br>
+</li>
+<li>
+<a href="#monitoring">monitor</a> : set to true to monitor changes to configuration files.</li>
+<li>
+<code>ignoreMissing</code> : By default <code>gofigure</code> will ignore missing directories. Set this to false to precent the ignoring of missing configuration directories.</li>
+<li>
+<a href="#environments">environment</a> : By default will look for <code>process.env.NODE_ENV</code> if this is not set then gofigure will read all properties. If you wish to explicity set the environment then set this property.</li>
+</ul><div class="highlight">
+<pre>
+<span class="kd">var</span> <span class="nx">gofigure</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"gofigure"</span><span class="p">);</span>
+
+<span class="c1">//Loader for directory of configurations</span>
+<span class="kd">var</span> <span class="nx">dirLoader</span> <span class="o">=</span> <span class="nx">gofigure</span><span class="p">({</span>
+  <span class="nx">locations</span> <span class="o">:</span> <span class="p">[</span><span class="nx">__dirname</span> <span class="o">+</span> <span class="s2">"/configs"</span><span class="p">]</span>
+<span class="p">});</span>
+
+
+<span class="c1">//Loader for files of configurations</span>
+<span class="kd">var</span> <span class="nx">dirLoader</span> <span class="o">=</span> <span class="nx">gofigure</span><span class="p">({</span>
+  <span class="nx">files</span> <span class="o">:</span> <span class="p">[</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">HOME</span> <span class="o">+</span> <span class="s2">"/configs/config1.json"</span><span class="p">,</span> <span class="nx">__dirname</span> <span class="o">+</span> <span class="s2">"/config1.json"</span><span class="p">]</span>
+<span class="p">});</span>
+
+
+</pre>
+</div>
+
+
+<p>You can load configurations asynchronously</p>
+
+<div class="highlight">
+<pre><span class="nx">loader</span><span class="p">.</span><span class="nx">load</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">config</span><span class="p">){</span>
+    <span class="kd">var</span> <span class="nx">PORT</span> <span class="o">=</span> <span class="nx">config</span><span class="p">.</span><span class="nx">port</span><span class="p">,</span> <span class="nx">HOST</span> <span class="o">=</span> <span class="nx">config</span><span class="p">.</span><span class="nx">host</span><span class="p">;</span>
+<span class="p">});</span>
+</pre>
+</div>
+
+
+<p>or synchronously</p>
+
+<div class="highlight">
+<pre><span class="kd">var</span> <span class="nx">gofigure</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"gofigure"</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">loader</span> <span class="o">=</span> <span class="nx">gofigure</span><span class="p">({</span><span class="nx">locations</span> <span class="o">:</span> <span class="p">[</span><span class="nx">__dirname</span> <span class="o">+</span> <span class="s2">"/configs"</span><span class="p">]});</span>
+<span class="kd">var</span> <span class="nx">config</span> <span class="o">=</span> <span class="nx">loader</span><span class="p">.</span><span class="nx">loadSync</span><span class="p">();</span>
+</pre>
+</div>
+
+
+<p><a name="loadDir"></a></p>
+
+<h3>Directories of configurations</h3>
+
+<p>To load directories that contain configuration files in the options object provide locations property that is an array of directories than contain your configurations.</p>
+
+<div class="highlight">
+<pre>
+<span class="kd">var</span> <span class="nx">gofigure</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"gofigure"</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">loader</span> <span class="o">=</span> <span class="nx">gofigure</span><span class="p">({</span><span class="nx">locations</span> <span class="o">:</span> <span class="p">[</span><span class="nx">__dirname</span> <span class="o">+</span> <span class="s2">"/configs"</span><span class="p">]});</span>
+<span class="nx">loader</span><span class="p">.</span><span class="nx">load</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">config</span><span class="p">){</span>
+    <span class="kd">var</span> <span class="nx">PORT</span> <span class="o">=</span> <span class="nx">config</span><span class="p">.</span><span class="nx">port</span><span class="p">,</span> <span class="nx">HOST</span> <span class="o">=</span> <span class="nx">config</span><span class="p">.</span><span class="nx">host</span><span class="p">;</span>
+<span class="p">});</span>
+</pre>
+</div>
+
+
+<p>The order of the locations matter as it defines a precedence for files. For example suppose you have a directory of default configuration files, and on production you want to override those configuration with environment specific configurations with out changing your module or source controlled files.</p>
+
+<div class="highlight">
+<pre><span class="kd">var</span> <span class="nx">gofigure</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"gofigure"</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">loader</span> <span class="o">=</span> <span class="nx">gofigure</span><span class="p">({</span><span class="nx">locations</span> <span class="o">:</span> <span class="p">[</span><span class="s2">"/prod/configs"</span><span class="p">,</span> <span class="nx">__dirname</span> <span class="o">+</span> <span class="s2">"/configs"</span><span class="p">]});</span>
+<span class="nx">loader</span><span class="p">.</span><span class="nx">load</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">config</span><span class="p">){</span>
+    <span class="kd">var</span> <span class="nx">PORT</span> <span class="o">=</span> <span class="nx">config</span><span class="p">.</span><span class="nx">port</span><span class="p">,</span> <span class="nx">HOST</span> <span class="o">=</span> <span class="nx">config</span><span class="p">.</span><span class="nx">host</span><span class="p">;</span>
+<span class="p">});</span>
+</pre>
+</div>
+
+
+<p>Here any production configuration files found in <code>/prod/configs</code> will override the properties in <code>__dirname + "/configs"</code>.</p>
+
+<p>Another use case might be in development where you have default properties and instead of altering the source controlled files the developer can override them by putting them in their home directory.</p>
+
+<div class="highlight">
+<pre><span class="kd">var</span> <span class="nx">gofigure</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"gofigure"</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">HOME</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">HOME</span><span class="p">;</span>
+
+<span class="kd">var</span> <span class="nx">loader</span> <span class="o">=</span> <span class="nx">gofigure</span><span class="p">({</span><span class="nx">locations</span> <span class="o">:</span> <span class="p">[</span> <span class="nx">HOME</span> <span class="o">+</span> <span class="s2">"/yourApp/configs"</span><span class="p">,</span> <span class="nx">__dirname</span> <span class="o">+</span> <span class="s2">"/configs"</span><span class="p">]});</span>
+<span class="nx">loader</span><span class="p">.</span><span class="nx">load</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">config</span><span class="p">){</span>
+    <span class="kd">var</span> <span class="nx">PORT</span> <span class="o">=</span> <span class="nx">config</span><span class="p">.</span><span class="nx">port</span><span class="p">,</span> <span class="nx">HOST</span> <span class="o">=</span> <span class="nx">config</span><span class="p">.</span><span class="nx">host</span><span class="p">;</span>
+<span class="p">});</span>
+</pre>
+</div>
+
+
+<p><a name="loadFiles"></a></p>
+
+<h3>Files</h3>
+
+<p>You may also load specific files rather than entire directories.</p>
+
+<div class="highlight">
+<pre><span class="kd">var</span> <span class="nx">gofigure</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"gofigure"</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">loader</span> <span class="o">=</span> <span class="nx">gofigure</span><span class="p">({</span><span class="nx">files</span> <span class="o">:</span> <span class="p">[</span><span class="s2">"/prod/configs/config1.json"</span><span class="p">,</span> <span class="nx">__dirname</span> <span class="o">+</span> <span class="s2">"/config.json"</span><span class="p">]});</span>
+<span class="nx">loader</span><span class="p">.</span><span class="nx">load</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">config</span><span class="p">){</span>
+    <span class="kd">var</span> <span class="nx">PORT</span> <span class="o">=</span> <span class="nx">config</span><span class="p">.</span><span class="nx">port</span><span class="p">,</span> <span class="nx">HOST</span> <span class="o">=</span> <span class="nx">config</span><span class="p">.</span><span class="nx">host</span><span class="p">;</span>
+<span class="p">});</span>
+</pre>
+</div>
+
+
+<p>Again order matters <code>/prod/configs/config1.json</code> will override <code>__dirname + "/config.json"</code></p>
+
+<p><a name="monitoring"></a></p>
+
+<h2>Monitoring</h2>
+
+<p>Gofigure supports the monitoring of changes to configuration files. </p>
+
+<p><a name="monitoringAll"></a></p>
+
+<h3>All files</h3>
+
+<p>To enable monitoring you can specify monitor to true in the options.</p>
+
+<div class="highlight">
+<pre><span class="kd">var</span> <span class="nx">gofigure</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"gofigure"</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">loader</span> <span class="o">=</span> <span class="nx">gofigure</span><span class="p">({</span><span class="nx">monitor</span> <span class="o">:</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">files</span> <span class="o">:</span> <span class="p">[</span><span class="s2">"/prod/configs/config1.json"</span><span class="p">,</span> <span class="nx">__dirname</span> <span class="o">+</span> <span class="s2">"/config.json"</span><span class="p">]});</span>
+<span class="kd">var</span> <span class="nx">config</span> <span class="o">=</span> <span class="nx">loader</span><span class="p">.</span><span class="nx">loadSync</span><span class="p">();</span>
+
+<span class="nx">loading</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"my.cool.property"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">newValue</span><span class="p">){</span>
+  <span class="c1">//...do something</span>
+<span class="p">});</span>
+</pre>
+</div>
+
+
+<p><a name="monitoringSome"></a></p>
+
+<h3>Individual Files</h3>
+
+<p>To monitor certain files you can use the files property and with object that have a <code>monitor : true</code> KV pair.</p>
+
+<div class="highlight">
+<pre><span class="kd">var</span> <span class="nx">gofigure</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"gofigure"</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">loader</span> <span class="o">=</span> <span class="nx">gofigure</span><span class="p">({</span><span class="nx">files</span> <span class="o">:</span> <span class="p">[</span>
+  <span class="p">{</span> 
+    <span class="nx">file</span> <span class="o">:</span> <span class="s2">"/prod/configs/config1.json"</span><span class="p">,</span> 
+    <span class="nx">monitor</span> <span class="o">:</span> <span class="kc">true</span>
+
+  <span class="p">},</span> 
+  <span class="nx">__dirname</span> <span class="o">+</span> <span class="s2">"/config.json"</span>
+<span class="p">]});</span>
+<span class="kd">var</span> <span class="nx">config</span> <span class="o">=</span> <span class="nx">loader</span><span class="p">.</span><span class="nx">loadSync</span><span class="p">();</span>
+
+<span class="nx">loading</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"my.cool.property"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">newValue</span><span class="p">){</span>
+  <span class="c1">//...do something</span>
+<span class="p">});</span>
+</pre>
+</div>
+
+
+<p>Just <code>config1.json</code> will be monitored for changes.</p>
+
+<p><a name="monitoringSyntax"></a></p>
+
+<h3>Property topic syntax</h3>
+
+<p>To listen to all properties</p>
+
+<div class="highlight">
+<pre><span class="nx">loading</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">config</span><span class="p">){</span>
+  <span class="c1">//...do something</span>
+<span class="p">});</span>
+
+<span class="nx">loading</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">nameOfPropertyChanged</span><span class="p">,</span> <span class="nx">config</span><span class="p">){</span>
+  <span class="c1">//...do something</span>
+<span class="p">});</span>
+
+<span class="nx">loading</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">nameOfPropertyChanged</span><span class="p">,</span> <span class="nx">value</span><span class="p">,</span> <span class="nx">config</span><span class="p">){</span>
+  <span class="c1">//...do something</span>
+<span class="p">});</span>
+</pre>
+</div>
+
+
+<p>To listen to specific properties</p>
+
+<div class="highlight">
+<pre><span class="nx">loading</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"my.cool.property"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">newValue</span><span class="p">){</span>
+  <span class="c1">//...do something</span>
+<span class="p">});</span>
+
+<span class="nx">loading</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"my.cool.property"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">newValue</span><span class="p">,</span> <span class="nx">config</span><span class="p">){</span>
+  <span class="c1">//...do something</span>
+<span class="p">});</span>
+
+<span class="nx">loading</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"my.cool.property"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">nameOfPropertyChanged</span><span class="p">,</span> <span class="nx">value</span><span class="p">,</span> <span class="nx">config</span><span class="p">){</span>
+  <span class="c1">//...do something</span>
+<span class="p">});</span>
+</pre>
+</div>
+
+
+<p>Wild cards</p>
+
+<div class="highlight">
+<pre>
+<span class="c1">//listen to any property changed on the my.cool object</span>
+<span class="nx">loading</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"my.cool.*"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">propName</span><span class="p">,</span> <span class="nx">newValue</span><span class="p">){</span>
+  <span class="c1">//...do something</span>
+<span class="p">});</span>
+
+
+<span class="c1">//listen to the change of a property named 'property' on any object</span>
+<span class="c1">//that is a member of my</span>
+<span class="nx">loading</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"my.*.property"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">propName</span><span class="p">,</span> <span class="nx">newValue</span><span class="p">){</span>
+  <span class="c1">//...do something</span>
+<span class="p">});</span>
+
+<span class="c1">//listen to the change of a property named 'property' that is</span>
+<span class="c1">//a member of a property called cool</span>
+<span class="nx">loading</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"*.cool.property"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">propName</span><span class="p">,</span> <span class="nx">newValue</span><span class="p">){</span>
+  <span class="c1">//...do something</span>
+<span class="p">});</span>
+
+<span class="c1">//listen to the change of property or otherProperty on the my.cool object.</span>
+<span class="nx">loading</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"my.cool.{property|otherProperty}"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">propName</span><span class="p">,</span> <span class="nx">newValue</span><span class="p">){</span>
+  <span class="c1">//...do something</span>
+<span class="p">});</span>
+
+<span class="c1">//listen to the change of property or otherProperty on the my cool or </span>
+<span class="c1">//notCool object.</span>
+<span class="nx">loading</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"my.{cool|notCool}.{property|otherProperty}"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">propName</span><span class="p">,</span> <span class="nx">newValue</span><span class="p">){</span>
+  <span class="c1">//...do something</span>
+<span class="p">});</span>
+</pre>
+</div>
+
+
+<p><a name="monitoringCB"></a></p>
+
+<h3>Callback Arguments</h3>
+
+<p>The property change callback will pass in the following values depending on the arity of the callback.</p>
+
+<p>If 1 argument is expected then just the callback invoked with the new value is a.</p>
+
+<div class="highlight">
+<pre>
+<span class="nx">loading</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"my.cool.property"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">newValue</span><span class="p">){</span>
+  <span class="c1">//...do something</span>
+<span class="p">});</span>
+
+
+</pre>
+</div>
+
+
+<p>If two arguments are expected then it is invoked with the property name and the new value.</p>
+
+<div class="highlight">
+<pre>
+<span class="nx">loading</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"my.cool.property"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">propName</span><span class="p">,</span> <span class="nx">newValue</span><span class="p">){</span>
+  <span class="c1">//...do something</span>
+<span class="p">});</span>
+
+
+</pre>
+</div>
+
+
+<p>Other wise the callback is invoked with the propertyName, newValue and the configuration object.</p>
+
+<div class="highlight">
+<pre>
+<span class="nx">loading</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"my.cool.property"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">propName</span><span class="p">,</span> <span class="nx">newValue</span><span class="p">,</span> <span class="nx">configObject</span><span class="p">){</span>
+  <span class="c1">//...do something</span>
+<span class="p">});</span>
+
+
+</pre>
+</div>
+
+
+<p><a name="environments"></a></p>
+
+<h2>Environments</h2>
+
+<p><code>gofigure</code> also supports environments, by default it will look for <code>NODE_ENV</code> and if it is set then it will use it. </p>
+
+<p>The following is an example configuration file</p>
+
+<div class="highlight">
+<pre>
+<span class="p">{</span>
+    <span class="s2">"development"</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">"logging"</span><span class="o">:</span><span class="p">{</span>
+            <span class="s2">"patio"</span><span class="o">:</span><span class="p">{</span>
+                    <span class="s2">"level"</span><span class="o">:</span><span class="s2">"DEBUG"</span><span class="p">,</span>
+                    <span class="s2">"appenders"</span><span class="o">:</span><span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="s2">"type"</span><span class="o">:</span><span class="s2">"RollingFileAppender"</span><span class="p">,</span>
+                            <span class="s2">"file"</span><span class="o">:</span><span class="s2">"/var/log/myApp/patio.log"</span>
+                        <span class="p">},</span>                              
+                        <span class="p">{</span>
+                            <span class="s2">"type"</span><span class="o">:</span><span class="s2">"ConsoleAppender"</span>
+                        <span class="p">}</span>
+                    <span class="p">]</span>
+                <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="s2">"app"</span> <span class="o">:</span> <span class="p">{</span>
+          <span class="s2">"host"</span> <span class="o">:</span> <span class="s2">"localhost"</span><span class="p">,</span>
+          <span class="s2">"port"</span> <span class="o">:</span> <span class="s2">"8088"</span>
+        <span class="p">},</span>
+        <span class="s2">"MYSQL_DB"</span> <span class="o">:</span> <span class="s2">"mysql://test:testpass@localhost:3306/dev_db"</span><span class="p">,</span>
+        <span class="s2">"MONGO_DB"</span> <span class="o">:</span> <span class="s2">"mongodb://test:testpass@localhost:27017/dev_db"</span>
+    <span class="p">},</span>
+    <span class="s2">"production"</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">"logging"</span><span class="o">:</span><span class="p">{</span>
+            <span class="s2">"patio"</span><span class="o">:</span><span class="p">{</span>
+                    <span class="s2">"level"</span><span class="o">:</span><span class="s2">"ERROR"</span><span class="p">,</span>
+                    <span class="s2">"appenders"</span><span class="o">:</span><span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="s2">"type"</span><span class="o">:</span><span class="s2">"RollingFileAppender"</span><span class="p">,</span>
+                            <span class="s2">"file"</span><span class="o">:</span><span class="s2">"/var/log/myApp/patio.log"</span>
+                        <span class="p">}</span>
+                    <span class="p">]</span>
+                <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="s2">"app"</span> <span class="o">:</span> <span class="p">{</span>
+          <span class="s2">"host"</span> <span class="o">:</span> <span class="s2">"prod.mydomain.com"</span><span class="p">,</span>
+          <span class="s2">"port"</span> <span class="o">:</span> <span class="s2">"80"</span>
+        <span class="p">},</span>
+        <span class="s2">"MYSQL_DB"</span> <span class="o">:</span> <span class="s2">"mysql://test:testpass@prod.mydomain.com:3306/prod_db"</span><span class="p">,</span>
+        <span class="s2">"MONGO_DB"</span> <span class="o">:</span> <span class="s2">"mongodb://test:testpass@prod.mydomain.com:27017/prd_db"</span>        
+    <span class="p">},</span>
+    <span class="s2">"test"</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">"logging"</span><span class="o">:</span><span class="p">{</span>
+            <span class="s2">"patio"</span><span class="o">:</span><span class="p">{</span>
+                    <span class="s2">"level"</span><span class="o">:</span><span class="s2">"INFO"</span><span class="p">,</span>
+                    <span class="s2">"appenders"</span><span class="o">:</span><span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="s2">"type"</span><span class="o">:</span><span class="s2">"RollingFileAppender"</span><span class="p">,</span>
+                            <span class="s2">"file"</span><span class="o">:</span><span class="s2">"/var/log/myApp/patio.log"</span>
+                        <span class="p">}</span>                                                       
+                    <span class="p">]</span>
+                <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="s2">"app"</span> <span class="o">:</span> <span class="p">{</span>
+          <span class="s2">"host"</span> <span class="o">:</span> <span class="s2">"test.mydomain.com"</span><span class="p">,</span>
+          <span class="s2">"port"</span> <span class="o">:</span> <span class="s2">"80"</span>
+        <span class="p">},</span>
+        <span class="s2">"MYSQL_DB"</span> <span class="o">:</span> <span class="s2">"mysql://test:testpass@test.mydomain.com:3306/test_db"</span><span class="p">,</span>
+        <span class="s2">"MONGO_DB"</span> <span class="o">:</span> <span class="s2">"mongodb://test:testpass@test.mydomain.com:27017/test_db"</span>        
+    <span class="p">}</span>
+<span class="p">}</span>
+
+</pre>
+</div>
+
+
+<p>To load just the development properties set the <code>environment</code> to development.</p>
+
+<div class="highlight">
+<pre>
+<span class="kd">var</span> <span class="nx">gofigure</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"gofigure"</span><span class="p">),</span>
+    <span class="nx">patio</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"patio"</span><span class="p">),</span>
+    <span class="nx">mongoose</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"mongoose"</span><span class="p">),</span>
+    <span class="nx">comb</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"comb"</span><span class="p">),</span>
+    <span class="nx">DB</span><span class="p">,</span> <span class="nx">HOST</span><span class="p">,</span> <span class="nx">PORT</span><span class="p">;</span>
+
+
+<span class="kd">var</span> <span class="nx">loader</span> <span class="o">=</span> <span class="nx">gofigure</span><span class="p">({</span>
+  <span class="nx">files</span> <span class="o">:</span> <span class="p">[</span><span class="nx">__dirname</span> <span class="o">+</span> <span class="s2">"/config-env.json"</span><span class="p">],</span>
+  <span class="nx">environment</span> <span class="o">:</span> <span class="s2">"development"</span>
+<span class="p">})</span>
+  <span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"MYSQL_DB"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">uri</span><span class="p">){</span>
+    <span class="nx">patio</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="nx">uri</span><span class="p">);</span>
+  <span class="p">})</span>
+  <span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"MONGO_DB"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">uri</span><span class="p">){</span>
+    <span class="nx">mongoose</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="nx">uri</span><span class="p">);</span>
+  <span class="p">})</span>
+  <span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"logging"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">logging</span><span class="p">){</span>
+    <span class="k">new</span> <span class="nx">comb</span><span class="p">.</span><span class="nx">logging</span><span class="p">.</span><span class="nx">PropertyConfigurator</span><span class="p">().</span><span class="nx">configure</span><span class="p">(</span><span class="nx">logging</span><span class="p">);</span>
+    <span class="nx">patio</span><span class="p">.</span><span class="nx">configureLogging</span><span class="p">(</span><span class="nx">logging</span><span class="p">);</span>
+  <span class="p">})</span>
+  <span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"app"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">app</span><span class="p">){</span>
+    <span class="c1">//...</span>
+  <span class="p">})</span>
+  <span class="p">.</span><span class="nx">load</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+    <span class="c1">//do something</span>
+  <span class="p">})</span>
+
+</pre>
+</div>
+
+
+<h2>License</h2>
+
+<p>MIT <a href="https://github.com/Pollenware/gofigure/raw/master/LICENSE">https://github.com/Pollenware/gofigure/raw/master/LICENSE</a></p>
+
+<h2>Meta</h2>
+
+<ul>
+<li>Code: <code>git clone git://github.com/pollenware/gofigure.git</code>
+</li>
+<li>Website:  <a href="http://pollenware.com">http://pollenware.com</a> - Twitter: <a href="http://twitter.com/pollenware">http://twitter.com/pollenware</a> - 877.465.4045</li>
+</ul>
+      </section>
+
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
+    
+  </body>
+</html>
